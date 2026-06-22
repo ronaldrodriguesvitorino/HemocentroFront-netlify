@@ -1,0 +1,71 @@
+.dashboard-container {
+  max-width: 1000px;
+  margin: 40px auto; /* Centraliza o painel na tela e dá espaço do Header */
+  padding: 20px;
+  text-align: center;
+}
+
+.dashboard-header h2 {
+  color: #d32f2f; /* Mantendo a identidade visual */
+  font-size: 28px;
+  margin-bottom: 5px;
+}
+
+.dashboard-header p {
+  color: #666;
+  margin-bottom: 40px;
+}
+
+/* A mágica do CSS Grid para distribuir os botões */
+.grid-modulos {
+  display: grid;
+  /* Cria colunas que se auto-ajustam, com tamanho mínimo de 160px */
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 25px; /* Espaço entre os botões */
+  justify-items: center;
+}
+
+/* O Botão Quadrado */
+.btn-modulo {
+  width: 100%;
+  aspect-ratio: 1 / 1; /* Garante que será um quadrado perfeito */
+  background-color: #ffffff;
+  border: 2px solid #eeeeee;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease; /* Animação suave no hover */
+}
+
+/* Efeito ao passar o mouse */
+.btn-modulo:hover {
+  transform: translateY(-5px); /* Faz o botão "subir" um pouquinho */
+  border-color: #d32f2f;
+  box-shadow: 0 8px 15px rgba(211, 47, 47, 0.2);
+}
+
+/* Espaço da imagem/ícone */
+.icone-wrapper {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+/* Texto de baixo */
+.btn-modulo span {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Efeito no texto quando passa o mouse no botão */
+.btn-modulo:hover span {
+  color: #d32f2f;
+}

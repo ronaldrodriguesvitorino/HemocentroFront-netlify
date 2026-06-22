@@ -1,1 +1,73 @@
-<p>gerente works!</p>
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h2>Visão Geral do Sistema</h2>
+    <p>Selecione o módulo que deseja administrar:</p>
+  </div>
+
+  <div class="grid-modulos">
+
+    <button class="btn-modulo" (click)="gerenciarHemocentro()">
+      <div class="icone-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64">
+          <rect x="20" y="30" width="60" height="60" fill="#2c2c2c" rx="5"/>
+          <polygon points="10,30 50,10 90,30" fill="#d32f2f"/>
+          <rect x="40" y="60" width="20" height="30" fill="#ffffff"/>
+          <rect x="46" y="40" width="8" height="16" fill="#d32f2f"/>
+          <rect x="42" y="44" width="16" height="8" fill="#d32f2f"/>
+        </svg>
+      </div>
+      <span>Hemocentros</span>
+    </button>
+
+    <button class="btn-modulo" (click)="gerenciarExame()">
+      <div class="icone-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64">
+          <rect x="30" y="80" width="40" height="10" fill="#2c2c2c" rx="3"/>
+          <rect x="45" y="70" width="10" height="10" fill="#2c2c2c"/>
+          <rect x="35" y="15" width="30" height="60" fill="#ffffff" stroke="#2c2c2c" stroke-width="6" rx="15"/>
+          <path d="M 38 45 L 62 45 L 62 60 C 62 68 56 72 50 72 C 44 72 38 68 38 60 Z" fill="#d32f2f"/>
+          <rect x="30" y="10" width="40" height="8" fill="#2c2c2c" rx="2"/>
+        </svg>
+      </div>
+      <span>Exames</span>
+    </button>
+
+    <button class="btn-modulo" (click)="gerenciarPessoa()">
+      <div class="icone-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64">
+          <circle cx="65" cy="35" r="15" fill="#2c2c2c"/>
+          <path d="M 45 85 C 45 65 85 65 85 85" fill="#2c2c2c" stroke="#2c2c2c" stroke-width="10" stroke-linecap="round"/>
+          <circle cx="40" cy="45" r="18" fill="#d32f2f" stroke="#ffffff" stroke-width="4"/>
+          <path d="M 15 90 C 15 65 65 65 65 90" fill="#d32f2f" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span>Pessoas</span>
+    </button>
+
+    <button class="btn-modulo" (click)="gerenciarUsuario()">
+      <div class="icone-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64">
+          <path d="M 30 45 V 30 C 30 15 70 15 70 30 V 45" fill="none" stroke="#2c2c2c" stroke-width="12" stroke-linecap="round"/>
+          <rect x="20" y="45" width="60" height="45" fill="#d32f2f" rx="8"/>
+          <circle cx="50" cy="60" r="8" fill="#ffffff"/>
+          <path d="M 40 80 C 40 70 60 70 60 80" fill="#ffffff" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span>Usuários</span>
+    </button>
+
+    <button class="btn-modulo" (click)="gerenciarColeta()">
+      <div class="icone-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="64" height="64">
+          <rect x="15" y="25" width="70" height="65" fill="#2c2c2c" rx="8"/>
+          <rect x="15" y="25" width="70" height="20" fill="#d32f2f" rx="8"/>
+          <rect x="30" y="15" width="8" height="20" fill="#ffffff" rx="4"/>
+          <rect x="62" y="15" width="8" height="20" fill="#ffffff" rx="4"/>
+          <path d="M 50 50 C 50 50 40 60 40 68 C 40 75 45 79 50 79 C 55 79 60 75 60 68 C 60 60 50 50 50 50 Z" fill="#ffffff"/>
+        </svg>
+      </div>
+      <span>Coletas</span>
+    </button>
+
+  </div>
+</div>

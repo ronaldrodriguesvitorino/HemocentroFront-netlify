@@ -1,1 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+main {
+  min-height: calc(100vh - 70px - 250px); /* Ajuste os valores conforme a altura do header e footer */
+}
