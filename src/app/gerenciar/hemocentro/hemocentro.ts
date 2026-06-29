@@ -114,5 +114,30 @@ const request = {
       }
     });
   }
-  
+  deletarComConfirmacao(id: number, nome: string): void {
+    const confirmou = confirm(`Tem certeza absoluta que deseja excluir o hemocentro "${nome}"?`);
+    
+    if (confirmou) {
+      this.http.delete('http://localhost:8080/hemocentro/' + id).subscribe({
+        next: (resposta) => {
+          alert("Hemocentro excluído com sucesso!");
+          this.listar(); 
+          this.cdr.detectChanges();
+        },
+        error: (erro) => {
+          console.log("Erro ao deletar:", erro);
+          alert("Não foi possível excluir. Verifique se existem coletas associadas a este hemocentro.");
+        }
+      });
+    }
+  }
+
+  prepararEdicao(hemocentro: any): void {
+    this.idBusca = hemocentro.id;
+    this.nome = hemocentro.nome;
+    this.descricao = hemocentro.descricao;
+    
+    this.mudarAba('editar'); 
+    this.cdr.detectChanges();
+  }
 }

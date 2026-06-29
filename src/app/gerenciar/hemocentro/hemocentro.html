@@ -1,17 +1,14 @@
 <div class="gerenciar-container">
   <div class="header-gerenciar">
-   <button class="btn-voltar" (click)="voltarParaPainel()">
-  ← Voltar ao Painel
-</button>
-    <h2>Gerenciamento de Hemocentros</h2>
+    <button class="btn-voltar" (click)="voltarParaPainel()">← Voltar ao Painel</button>
   </div>
-
+<div class = "header-gerenciar">
+  <h2>Gerenciamento de Hemocentros</h2>
+   </div>
   <div class="abas-navegacao">
     <button [class.ativa]="abaAtual === 'listar'" (click)="mudarAba('listar')">📄 Listar Todos</button>
     <button [class.ativa]="abaAtual === 'buscar'" (click)="mudarAba('buscar')">🔍 Buscar</button>
     <button [class.ativa]="abaAtual === 'criar'" (click)="mudarAba('criar')">➕ Criar Novo</button>
-    <button [class.ativa]="abaAtual === 'editar'" (click)="mudarAba('editar')">✏️ Editar</button>
-    <button [class.ativa]="abaAtual === 'deletar'" (click)="mudarAba('deletar')">🗑️ Deletar</button>
   </div>
 
   <div class="conteudo-aba">
@@ -21,20 +18,25 @@
         <h3>Lista de Hemocentros</h3>
         <table class="tabela-dados">
           <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Descrição</th>
-          </tr>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Descrição</th>
+              <th style="text-align: center;">Ações</th>
+            </tr>
           </thead>
           <tbody>
-          @for (hemocentro of listaHemocentros; track hemocentro.id){
-            <tr>
-              <td>{{hemocentro.id}}</td>
-              <td>{{hemocentro.nome}}</td>
-              <td>{{hemocentro.descricao}}</td>
-            </tr>
-          }
+            @for (hemocentro of listaHemocentros; track hemocentro.id){
+              <tr>
+                <td>{{hemocentro.id}}</td>
+                <td>{{hemocentro.nome}}</td>
+                <td>{{hemocentro.descricao}}</td>
+                <td style="text-align: center;">
+                  <button type="button" class="btn-tabela-editar" (click)="prepararEdicao(hemocentro)">✏️ Editar</button>
+                  <button type="button" class="btn-tabela-deletar" (click)="deletarComConfirmacao(hemocentro.id, hemocentro.nome)">🗑️ Excluir</button>
+                </td>
+              </tr>
+            }
           </tbody>
         </table>
       </div>
@@ -44,82 +46,50 @@
       <div class="aba-card">
         <h3>Buscar Hemocentro</h3>
         <div class="form-grupo row">
-          <input type="number"
-                 [(ngModel)] = "idBusca"
-                 name = "idBusca"
-                 placeholder="Digite o ID do Hemocentro">
-          <button class="btn-acao" (click)="buscar()">Buscar</button>
+          <input type="number" [(ngModel)]="idBusca" name="idBusca" placeholder="Digite o ID do Hemocentro">
+          <button type="button" class="btn-acao" (click)="buscar()">Buscar</button>
         </div>
         <div class="resultado-box">
           <p><strong>ID:</strong> {{busca?.id}}</p>
+          <p><strong>Nome:</strong> {{busca?.nome}}</p>
           <p><strong>Descrição:</strong> {{busca?.descricao}}</p>
         </div>
       </div>
     }
 
-   @if (abaAtual === 'criar') {
-  <div class="aba-card">
-    <h3>Cadastrar Novo Hemocentro</h3>
-    <form class="form-gerenciar">
-      
-      <div class="form-grupo">
-        <label>Nome do Hemocentro:</label>
-        <input type="text"
-               [(ngModel)]="nome"
-               name="nome"
-               placeholder="Ex: Hemocentro Regional">
+    @if (abaAtual === 'criar') {
+      <div class="aba-card">
+        <h3>Cadastrar Novo Hemocentro</h3>
+        <form class="form-gerenciar">
+          <div class="form-grupo">
+            <label>Nome do Hemocentro:</label>
+            <input type="text" [(ngModel)]="nome" name="nome" placeholder="Ex: Hemocentro Regional">
+          </div>
+          <div class="form-grupo">
+            <label>Descrição do Hemocentro:</label>
+            <input type="text" [(ngModel)]="descricao" name="descricao" placeholder="Ex: Posto Avançado Pampulha">
+          </div>
+          <button type="button" class="btn-sucesso" (click)="criar()">Salvar Cadastro</button>
+        </form>
       </div>
+    }
 
-      <div class="form-grupo">
-        <label>Descrição do Hemocentro:</label>
-        <input type="text"
-               [(ngModel)]="descricao"
-               name="descricao"
-               placeholder="Ex: Posto Avançado Pampulha">
-      </div>
-      
-      <button type="button" class="btn-sucesso" (click)="criar()">Salvar Cadastro</button>
-    </form>
-  </div>
-}
     @if (abaAtual === 'editar') {
-  <div class="aba-card">
-    <h3>Editar Hemocentro</h3>
-    <div class="form-grupo row">
-      <input type="number" [(ngModel)]="idBusca" name="idBuscaEditar" placeholder="ID para editar">
-      <button type="button" class="btn-acao" (click)="buscar()">Carregar Dados</button>
-    </div>
-    
-    <form class="form-gerenciar mt-20">
-      <div class="form-grupo">
-        <label>Novo Nome:</label>
-        <input type="text" [(ngModel)]="nome" name="nomeEditar">
+      <div class="aba-card">
+        <h3>Editar Hemocentro</h3>
+        <form class="form-gerenciar mt-20">
+          <div class="form-grupo">
+            <label>Novo Nome:</label>
+            <input type="text" [(ngModel)]="nome" name="nomeEditar">
+          </div>
+          <div class="form-grupo">
+            <label>Nova Descrição:</label>
+            <input type="text" [(ngModel)]="descricao" name="descricaoEditar">
+          </div>
+          <button type="button" class="btn-sucesso" (click)="editar()">Atualizar</button>
+        </form>
       </div>
-
-      <div class="form-grupo">
-        <label>Nova Descrição:</label>
-        <input type="text" [(ngModel)]="descricao" name="descricaoEditar">
-      </div>
-      
-      <button type="button" class="btn-sucesso" (click)="editar()">Atualizar</button>
-    </form>
-  </div>
-}
-
-    @if (abaAtual === 'deletar') {
-  <div class="aba-card">
-    <h3>Deletar Hemocentro</h3>
-    <p class="alerta-perigo">Atenção: Esta ação não pode ser desfeita e pode afetar coletas vinculadas!</p>
-    <div class="form-grupo row">
-      
-      <input type="number" 
-             [(ngModel)]="idBusca" 
-             name="idDeletar" 
-             placeholder="ID do Hemocentro para excluir">
-      <button type="button" class="btn-perigo" (click)="deletar(idBusca)">Excluir Permanentemente</button>
-    </div>
-  </div>
-}
+    }
 
   </div>
 </div>

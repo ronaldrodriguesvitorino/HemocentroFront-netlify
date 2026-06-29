@@ -1,1 +1,108 @@
-<p>pessoa works!</p>
+<div class="gerenciar-container">
+  <div class="header-gerenciar">
+    <button class="btn-voltar" (click)="voltarParaPainel()">← Voltar ao Painel</button>
+    <h2>Gerenciamento de Pessoas</h2>
+  </div>
+
+  <div class="abas-navegacao">
+    <button [class.ativa]="abaAtual === 'listar'" (click)="mudarAba('listar')">📄 Listar Todos</button>
+    <button [class.ativa]="abaAtual === 'buscar'" (click)="mudarAba('buscar')">🔍 Buscar (Por ID)</button>
+    <button [class.ativa]="abaAtual === 'criar'" (click)="mudarAba('criar')">➕ Cadastrar Nova</button>
+  </div>
+
+  <div class="conteudo-aba">
+
+    @if (abaAtual === 'listar') {
+      <div class="aba-card">
+        <h3>Lista de Pessoas Cadastradas</h3>
+        <table class="tabela-dados">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>CPF</th>
+              <th>E-mail</th>
+              <th style="text-align: center;">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (pessoa of listaPessoas; track pessoa.id){
+              <tr>
+                <td>{{pessoa.id}}</td>
+                <td>{{pessoa.nome}}</td>
+                <td>{{pessoa.cpf}}</td>
+                <td>{{pessoa.email}}</td>
+                <td style="text-align: center;">
+                  <button type="button" class="btn-tabela-editar" (click)="prepararEdicao(pessoa)">✏️ Editar</button>
+                  <button type="button" class="btn-tabela-deletar" (click)="deletarComConfirmacao(pessoa.id, pessoa.nome)">🗑️ Excluir</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (abaAtual === 'buscar') {
+      <div class="aba-card">
+        <h3>Buscar Pessoa</h3>
+        <div class="form-grupo row">
+          <input type="number" [(ngModel)]="idBusca" name="idBusca" placeholder="Digite o ID da Pessoa">
+          <button type="button" class="btn-acao" (click)="buscar()">Buscar</button>
+        </div>
+        
+        @if (busca) {
+          <div class="resultado-box">
+            <p><strong>ID:</strong> {{busca.id}}</p>
+            <p><strong>Nome:</strong> {{busca.nome}}</p>
+            <p><strong>CPF:</strong> {{busca.cpf}}</p>
+            <p><strong>E-mail:</strong> {{busca.email}}</p>
+          </div>
+        }
+      </div>
+    }
+
+    @if (abaAtual === 'criar') {
+      <div class="aba-card">
+        <h3>Cadastrar Nova Pessoa</h3>
+        <form class="form-gerenciar">
+          <div class="form-grupo">
+            <label>Nome Completo:</label>
+            <input type="text" [(ngModel)]="nome" name="nome" placeholder="Ex: João da Silva">
+          </div>
+          <div class="form-grupo">
+            <label>CPF (Apenas números):</label>
+            <input type="text" [(ngModel)]="cpf" name="cpf" placeholder="Ex: 11122233344" maxlength="11">
+          </div>
+          <div class="form-grupo">
+            <label>E-mail:</label>
+            <input type="email" [(ngModel)]="email" name="email" placeholder="Ex: joao@email.com">
+          </div>
+          <button type="button" class="btn-sucesso mt-20" (click)="criar()">Salvar Cadastro</button>
+        </form>
+      </div>
+    }
+
+    @if (abaAtual === 'editar') {
+      <div class="aba-card">
+        <h3>Editar Pessoa</h3>
+        <form class="form-gerenciar mt-20">
+          <div class="form-grupo">
+            <label>Nome Completo:</label>
+            <input type="text" [(ngModel)]="nome" name="nomeEditar">
+          </div>
+          <div class="form-grupo">
+            <label>CPF:</label>
+            <input type="text" [(ngModel)]="cpf" name="cpfEditar" maxlength="11">
+          </div>
+          <div class="form-grupo">
+            <label>E-mail:</label>
+            <input type="email" [(ngModel)]="email" name="emailEditar">
+          </div>
+          <button type="button" class="btn-sucesso mt-20" (click)="editar()">Atualizar Dados</button>
+        </form>
+      </div>
+    }
+
+  </div>
+</div>
