@@ -1,6 +1,8 @@
 <div class="gerenciar-container">
   <div class="header-gerenciar">
-    <button class="btn-voltar">⬅ Voltar ao Painel</button>
+   <button class="btn-voltar" (click)="voltarParaPainel()">
+  ← Voltar ao Painel
+</button>
     <h2>Gerenciamento de Hemocentros</h2>
   </div>
 
@@ -21,6 +23,7 @@
           <thead>
           <tr>
             <th>ID</th>
+            <th>Nome</th>
             <th>Descrição</th>
           </tr>
           </thead>
@@ -28,6 +31,7 @@
           @for (hemocentro of listaHemocentros; track hemocentro.id){
             <tr>
               <td>{{hemocentro.id}}</td>
+              <td>{{hemocentro.nome}}</td>
               <td>{{hemocentro.descricao}}</td>
             </tr>
           }
@@ -53,48 +57,69 @@
       </div>
     }
 
-    @if (abaAtual === 'criar') {
-      <div class="aba-card">
-        <h3>Cadastrar Novo Hemocentro</h3>
-        <form class="form-gerenciar">
-          <div class="form-grupo">
-            <label>Descrição do Hemocentro:</label>
-            <input type="text"
-                   [(ngModel)] = "descricao"
-                   name = "idBusca"placeholder="Ex: Posto Avançado Pampulha">
-          </div>
-          <button type="submit" class="btn-sucesso">Salvar Cadastro</button>
-        </form>
+   @if (abaAtual === 'criar') {
+  <div class="aba-card">
+    <h3>Cadastrar Novo Hemocentro</h3>
+    <form class="form-gerenciar">
+      
+      <div class="form-grupo">
+        <label>Nome do Hemocentro:</label>
+        <input type="text"
+               [(ngModel)]="nome"
+               name="nome"
+               placeholder="Ex: Hemocentro Regional">
       </div>
-    }
 
-    @if (abaAtual === 'editar') {
-      <div class="aba-card">
-        <h3>Editar Hemocentro</h3>
-        <div class="form-grupo row">
-          <input type="number" placeholder="ID para editar">
-          <button class="btn-acao">Carregar Dados</button>
-        </div>
-        <form class="form-gerenciar mt-20">
-          <div class="form-grupo">
-            <label>Nova Descrição:</label>
-            <input type="text">
-          </div>
-          <button type="submit" class="btn-sucesso">Atualizar</button>
-        </form>
+      <div class="form-grupo">
+        <label>Descrição do Hemocentro:</label>
+        <input type="text"
+               [(ngModel)]="descricao"
+               name="descricao"
+               placeholder="Ex: Posto Avançado Pampulha">
       </div>
-    }
+      
+      <button type="button" class="btn-sucesso" (click)="criar()">Salvar Cadastro</button>
+    </form>
+  </div>
+}
+    @if (abaAtual === 'editar') {
+  <div class="aba-card">
+    <h3>Editar Hemocentro</h3>
+    <div class="form-grupo row">
+      <input type="number" [(ngModel)]="idBusca" name="idBuscaEditar" placeholder="ID para editar">
+      <button type="button" class="btn-acao" (click)="buscar()">Carregar Dados</button>
+    </div>
+    
+    <form class="form-gerenciar mt-20">
+      <div class="form-grupo">
+        <label>Novo Nome:</label>
+        <input type="text" [(ngModel)]="nome" name="nomeEditar">
+      </div>
+
+      <div class="form-grupo">
+        <label>Nova Descrição:</label>
+        <input type="text" [(ngModel)]="descricao" name="descricaoEditar">
+      </div>
+      
+      <button type="button" class="btn-sucesso" (click)="editar()">Atualizar</button>
+    </form>
+  </div>
+}
 
     @if (abaAtual === 'deletar') {
-      <div class="aba-card">
-        <h3>Deletar Hemocentro</h3>
-        <p class="alerta-perigo">Atenção: Esta ação não pode ser desfeita e pode afetar coletas vinculadas!</p>
-        <div class="form-grupo row">
-          <input type="number" placeholder="ID do Hemocentro para excluir">
-          <button class="btn-perigo">Excluir Permanentemente</button>
-        </div>
-      </div>
-    }
+  <div class="aba-card">
+    <h3>Deletar Hemocentro</h3>
+    <p class="alerta-perigo">Atenção: Esta ação não pode ser desfeita e pode afetar coletas vinculadas!</p>
+    <div class="form-grupo row">
+      
+      <input type="number" 
+             [(ngModel)]="idBusca" 
+             name="idDeletar" 
+             placeholder="ID do Hemocentro para excluir">
+      <button type="button" class="btn-perigo" (click)="deletar(idBusca)">Excluir Permanentemente</button>
+    </div>
+  </div>
+}
 
   </div>
 </div>
