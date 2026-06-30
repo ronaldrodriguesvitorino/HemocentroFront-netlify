@@ -1,1 +1,56 @@
-<p>doador works!</p>
+<div class="gerenciar-container" style="max-width: 700px;">
+  <div class="header-gerenciar" style="justify-content: space-between; border-bottom: 3px solid #d32f2f; padding-bottom: 20px;">
+    <div>
+      <h2 style="color: #d32f2f;">Portal do Doador</h2>
+      <p style="margin: 0; color: #555;">Acompanhe o histórico das suas doações de sangue.</p>
+    </div>
+    <button class="btn-perigo" (click)="sair()">Sair da Conta</button>
+  </div>
+
+  <div class="aba-card" style="margin-top: 20px; border: 1px solid #eee;">
+    <h3>Minhas Doações Realizadas</h3>
+    
+    @if (minhasColetas.length === 0) {
+      <div style="padding: 30px; text-align: center; background: #f9f9f9; border-radius: 8px;">
+        <p style="font-size: 18px; color: #555;">Você ainda não possui doações registradas no sistema. 🩸</p>
+      </div>
+    }
+
+    @for (coleta of minhasColetas; track coleta.id) {
+      <div style="background: white; border: 1px solid #ddd; border-left: 5px solid #d32f2f; padding: 15px; margin-bottom: 15px; border-radius: 4px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong>Doação #{{coleta.id}}</strong>
+            <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">Data: {{coleta.dataColeta}}</p>
+          </div>
+          <button class="btn-acao" (click)="verResultados(coleta.id)">
+            {{ coletaAbertaId === coleta.id ? 'Ocultar Exames ▲' : 'Ver Exames e Tipagem ▼' }}
+          </button>
+        </div>
+
+        @if (coletaAbertaId === coleta.id) {
+          <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ccc;">
+            <table class="tabela-dados">
+              <thead><tr><th>Exame Realizado</th><th>Resultado</th></tr></thead>
+              <tbody>
+                @for (exame of examesDaColetaAberta; track exame.id) {
+                  <tr>
+                    <td>{{exame.nome}}</td>
+                    <td>
+                      <strong [style.color]="exame.situacao === 'PENDENTE' ? '#999' : '#1565c0'">
+                        {{exame.situacao}}
+                      </strong>
+                    </td>
+                  </tr>
+                }
+                @if (examesDaColetaAberta.length === 0) {
+                  <tr><td colspan="2" style="text-align: center; color: #888;">Nenhum exame lançado ainda pelo laboratório.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

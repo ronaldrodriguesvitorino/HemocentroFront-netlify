@@ -6,7 +6,7 @@
 
   <div class="abas-navegacao">
     <button [class.ativa]="abaAtual === 'listar'" (click)="mudarAba('listar')">📄 Listar Todos</button>
-    <button [class.ativa]="abaAtual === 'buscar'" (click)="mudarAba('buscar')">🔍 Buscar</button>
+    <button [class.ativa]="abaAtual === 'buscar'" (click)="mudarAba('buscar')">🔍 Buscar Específico (ID)</button>
     <button [class.ativa]="abaAtual === 'criar'" (click)="mudarAba('criar')">➕ Conceder Acesso</button>
   </div>
 
@@ -14,7 +14,16 @@
 
     @if (abaAtual === 'listar') {
       <div class="aba-card">
-        <h3>Lista de Usuários com Acesso</h3>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h3 style="margin: 0;">Lista de Usuários com Acesso</h3>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <label style="font-size: 14px; color: #555;">🔍 Filtrar:</label>
+            <input type="text" [(ngModel)]="termoBusca" placeholder="ID, Login ou Perfil..." 
+                   style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 250px;">
+          </div>
+        </div>
+
         <table class="tabela-dados">
           <thead>
             <tr>
@@ -25,7 +34,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (usuario of listaUsuarios; track usuario.id){
+            @for (usuario of usuariosFiltrados; track usuario.id){
               <tr>
                 <td>{{usuario.id}}</td>
                 <td><strong>{{usuario.login}}</strong></td>
@@ -36,6 +45,9 @@
                 </td>
               </tr>
             }
+            @if (usuariosFiltrados.length === 0) {
+              <tr><td colspan="4" style="text-align: center; color: #888;">Nenhum usuário encontrado na busca.</td></tr>
+            }
           </tbody>
         </table>
       </div>
@@ -43,14 +55,14 @@
 
     @if (abaAtual === 'buscar') {
       <div class="aba-card">
-        <h3>Buscar Usuário</h3>
+        <h3>Buscar Usuário pelo ID </h3>
         <div class="form-grupo row">
-          <input type="number" [(ngModel)]="idBusca" name="idBusca" placeholder="Digite o ID do Usuário">
+          <input type="number" [(ngModel)]="idBusca" name="idBusca" placeholder="Digite o ID exato do Usuário">
           <button type="button" class="btn-acao" (click)="buscar()">Buscar</button>
         </div>
         
         @if (busca) {
-          <div class="resultado-box">
+          <div class="resultado-box mt-20" style="background: #f5f5f5; padding: 15px; border-radius: 5px;">
             <p><strong>ID:</strong> {{busca.id}}</p>
             <p><strong>Login:</strong> {{busca.login}}</p>
             <p><strong>Perfil:</strong> {{busca.tipoPerfil}}</p>
@@ -130,7 +142,10 @@
             </div>
           </div>
 
-          <button type="button" class="btn-sucesso mt-20" (click)="editar()">Atualizar Usuário</button>
+          <div style="display: flex; gap: 10px;" class="mt-20">
+            <button type="button" class="btn-sucesso" (click)="editar()">Atualizar Usuário</button>
+            <button type="button" class="btn-perigo" style="width: auto; padding: 0 20px;" (click)="limparFormulario(); mudarAba('listar')">Cancelar</button>
+          </div>
         </form>
       </div>
     }

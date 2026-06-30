@@ -10,23 +10,37 @@ import { Router } from '@angular/router';
   styleUrl: './coleta.css', 
 })
 export class Coleta {
-  abaAtual: string = 'listar';
+  // Abas separadas e limpas
+  abaAtual: string = 'listar'; 
   
   listaColetas: any[] = [];
   listaPessoas: any[] = [];
   listaHemocentros: any[] = [];
   listaExamesGerais: any[] = [];
   
-  // Variáveis da Coleta
-  coletaSelecionada: any; 
+  // NOVIDADE: Motor de Busca
+  termoBusca: string = '';
+
+  // Variáveis - Coleta (CRUD Completo)
+  editandoColeta: boolean = false;
+  idColetaEdicao!: number;
   dataColeta!: string; 
   dataValidade!: string;
   hemocentroId!: number;
   pessoaId!: number;
+  tipoSanguineoColeta: string = ''; // Tipagem direto na bolsa
 
-  // Checkboxes e Edição
-  examesDestaColeta: any[] = []; 
+  // Variáveis - Laboratório
+  coletaSelecionada: any;
+  examesDestaColeta: any[] = [];
   examesDisponiveisParaLancar: any[] = []; 
+
+  listaTiposSanguineos = [
+    { valor: 'A_POSITIVO', label: 'A+' }, { valor: 'A_NEGATIVO', label: 'A-' },
+    { valor: 'B_POSITIVO', label: 'B+' }, { valor: 'B_NEGATIVO', label: 'B-' },
+    { valor: 'AB_POSITIVO', label: 'AB+' }, { valor: 'AB_NEGATIVO', label: 'AB-' },
+    { valor: 'O_POSITIVO', label: 'O+' }, { valor: 'O_NEGATIVO', label: 'O-' }
+  ];
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router) {
     this.carregarDadosBase();
@@ -37,7 +51,7 @@ export class Coleta {
 
   mudarAba(aba: string) {
     this.abaAtual = aba;
-    if (aba === 'listar') this.listar();
+    if (aba === 'listar' || aba === 'laboratorio') this.listar();
   }
 
   carregarDadosBase() {
@@ -53,47 +67,111 @@ export class Coleta {
     });
   }
 
+  // NOVIDADE: Filtro dinâmico e reativo para a tabela
+  get coletasFiltradas() {
+    if (!this.termoBusca) return this.listaColetas;
+    const termo = this.termoBusca.toLowerCase();
+    return this.listaColetas.filter(c => 
+      c.id.toString().includes(termo) || 
+      c.dataColeta.includes(termo) || 
+      c.pessoaId.toString().includes(termo) ||
+      (c.tipoSanguineo && c.tipoSanguineo.toLowerCase().includes(termo))
+    );
+  }
+
   formatarDataParaBackend(dataHTML: string): string {
+    if (!dataHTML) return '';
     const partes = dataHTML.split('-');
     return `${partes[2]}-${partes[1]}-${partes[0]}`; 
   }
 
-  criarColeta() {
+  formatarDataParaHTML(dataBackend: string): string {
+    if (!dataBackend) return '';
+    const p = dataBackend.split('-');
+    return `${p[2]}-${p[1]}-${p[0]}`; 
+  }
+
+  salvarColeta() {
+    if (!this.dataColeta || !this.dataValidade || !this.pessoaId || !this.hemocentroId) {
+      alert("Preencha as datas, o doador e o hemocentro!");
+      return;
+    }
+
     const request = {
       dataColeta: this.formatarDataParaBackend(this.dataColeta),
       dataValidade: this.formatarDataParaBackend(this.dataValidade),
-      hemocentroId: this.hemocentroId,
-      pessoaId: this.pessoaId
+      hemocentroId: Number(this.hemocentroId),
+      pessoaId: Number(this.pessoaId),
+      tipoSanguineo: this.tipoSanguineoColeta || null
     };
 
-    this.http.post('http://localhost:8080/coleta', request).subscribe({
-      next: () => {
-        alert("Bolsa de sangue cadastrada!");
-        this.mudarAba('listar');
-      },
-      error: (err) => console.log(err)
-    });
+    if (this.editandoColeta) {
+      this.http.put('http://localhost:8080/coleta/' + this.idColetaEdicao, request).subscribe({
+        next: () => {
+          alert("Coleta atualizada!");
+          this.limparFormularioColeta();
+          this.listar();
+        }
+      });
+    } else {
+      this.http.post('http://localhost:8080/coleta', request).subscribe({
+        next: () => {
+          alert("Bolsa de sangue cadastrada!");
+          this.limparFormularioColeta();
+          this.listar();
+        }
+      });
+    }
+  }
+
+  prepararEdicaoColeta(coleta: any) {
+    this.editandoColeta = true;
+    this.idColetaEdicao = coleta.id;
+    this.dataColeta = this.formatarDataParaHTML(coleta.dataColeta);
+    this.dataValidade = this.formatarDataParaHTML(coleta.dataValidade);
+    this.pessoaId = coleta.pessoaId;
+    this.hemocentroId = coleta.hemocentroId;
+    this.tipoSanguineoColeta = coleta.tipoSanguineo || '';
+    this.mudarAba('criar');
+  }
+
+  excluirColeta(id: number) {
+    if (confirm(`Excluir permanentemente a coleta #${id}?`)) {
+      this.http.delete('http://localhost:8080/coleta/' + id).subscribe({
+        next: () => {
+          alert("Coleta excluída!");
+          if (this.coletaSelecionada?.id === id) this.coletaSelecionada = null;
+          this.listar();
+        },
+        error: () => alert("Remova os exames vinculados a esta coleta no laboratório antes de excluí-la.")
+      });
+    }
+  }
+
+  limparFormularioColeta() {
+    this.editandoColeta = false;
+    this.dataColeta = '';
+    this.dataValidade = '';
+    this.pessoaId = 0;
+    this.hemocentroId = 0;
+    this.tipoSanguineoColeta = '';
+    this.mudarAba('listar');
   }
 
   abrirGerenciadorDeExames(coleta: any) {
     this.coletaSelecionada = coleta;
     this.carregarExamesDaColeta(coleta.id);
-    this.mudarAba('exames-coleta');
+    this.mudarAba('laboratorio');
   }
 
   carregarExamesDaColeta(coletaId: number) {
     this.http.get<any[]>('http://localhost:8080/exameColeta?coletaId=' + coletaId).subscribe({
       next: (res) => {
-        this.examesDestaColeta = res.map(exame => ({
-          ...exame, 
-          editando: false, 
-          novaSituacao: exame.situacao 
-        }));
-        
+        this.examesDestaColeta = res.map(exame => ({ ...exame, editando: false, novaSituacao: exame.situacao }));
         this.atualizarListaDeCheckboxes();
         this.cdr.detectChanges();
       },
-      error: (err) => {
+      error: () => {
         this.examesDestaColeta = [];
         this.atualizarListaDeCheckboxes();
       }
@@ -102,39 +180,21 @@ export class Coleta {
 
   atualizarListaDeCheckboxes() {
     this.examesDisponiveisParaLancar = this.listaExamesGerais
-      .filter(exameGeral => {
-        const jaFoiLancado = this.examesDestaColeta.some(lancado => lancado.nome === exameGeral.nome);
-        return !jaFoiLancado;
-      })
-      .map(exame => ({
-        id: exame.id,
-        nome: exame.nome,
-        selecionado: false, 
-        situacao: 'PENDENTE' 
-      }));
+      .filter(exGeral => !this.examesDestaColeta.some(lancado => lancado.nome === exGeral.nome))
+      .map(ex => ({ id: ex.id, nome: ex.nome, selecionado: false, situacao: 'PENDENTE' }));
   }
 
   salvarExamesEmMassa() {
-    const examesMarcados = this.examesDisponiveisParaLancar.filter(e => e.selecionado);
+    const marcados = this.examesDisponiveisParaLancar.filter(e => e.selecionado);
+    if (marcados.length === 0) { alert("Marque pelo menos um exame!"); return; }
 
-    if (examesMarcados.length === 0) {
-      alert("Marque pelo menos um exame na caixinha antes de salvar.");
-      return;
-    }
-
-    let requisicoesFeitas = 0;
-
-    examesMarcados.forEach(exame => {
-      const request = {
-        exameId: exame.id,
-        situacao: exame.situacao,
-        coletaId: this.coletaSelecionada.id
-      };
-
+    let reqs = 0;
+    marcados.forEach(exame => {
+      const request = { exameId: exame.id, situacao: exame.situacao, coletaId: this.coletaSelecionada.id };
       this.http.post('http://localhost:8080/exameColeta', request).subscribe({
         next: () => {
-          requisicoesFeitas++;
-          if (requisicoesFeitas === examesMarcados.length) {
+          reqs++;
+          if (reqs === marcados.length) {
             alert("Exames lançados com sucesso!");
             this.carregarExamesDaColeta(this.coletaSelecionada.id);
           }
@@ -143,30 +203,17 @@ export class Coleta {
     });
   }
 
-  habilitarEdicao(ec: any) {
-    ec.editando = true;
-  }
-
-  cancelarEdicao(ec: any) {
-    ec.editando = false;
-    ec.novaSituacao = ec.situacao; 
-  }
+  habilitarEdicao(ec: any) { ec.editando = true; }
+  cancelarEdicao(ec: any) { ec.editando = false; ec.novaSituacao = ec.situacao; }
 
   salvarEdicao(ec: any) {
-    const examenOriginal = this.listaExamesGerais.find(e => e.nome === ec.nome);
-
-    const request = {
-      exameId: examenOriginal.id,
-      situacao: ec.novaSituacao,
-      coletaId: this.coletaSelecionada.id
-    };
-
-    this.http.put('http://localhost:8080/exameColeta/' + ec.id, request).subscribe({
+    const exOriginal = this.listaExamesGerais.find(e => e.nome === ec.nome);
+    const req = { exameId: exOriginal.id, situacao: ec.novaSituacao, coletaId: this.coletaSelecionada.id };
+    this.http.put('http://localhost:8080/exameColeta/' + ec.id, req).subscribe({
       next: () => {
         alert("Situação do exame atualizada!");
         this.carregarExamesDaColeta(this.coletaSelecionada.id);
-      },
-      error: () => alert("Erro ao atualizar a situação.")
+      }
     });
   }
 }

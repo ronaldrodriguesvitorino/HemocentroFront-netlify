@@ -20,6 +20,20 @@ export class Pessoa {
   cpf!: string;
   email!: string;
 
+  // NOVIDADE: Motor de Busca Reativo
+  termoBusca: string = '';
+
+  get pessoasFiltradas() {
+    if (!this.termoBusca) return this.listaPessoas;
+    const t = this.termoBusca.toLowerCase();
+    return this.listaPessoas.filter(p => 
+      p.id.toString().includes(t) || 
+      (p.nome && p.nome.toLowerCase().includes(t)) || 
+      (p.cpf && p.cpf.includes(t)) || 
+      (p.email && p.email.toLowerCase().includes(t))
+    );
+  }
+
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router) {
     this.listar();
   }
@@ -76,7 +90,6 @@ export class Pessoa {
         alert("Pessoa cadastrada com sucesso!");
         this.limparFormulario();
         this.mudarAba('listar');
-        this.cdr.detectChanges();
       },
       error: (erro) => {
         console.log("Erro ao criar:", erro);
@@ -91,7 +104,6 @@ export class Pessoa {
     this.cpf = pessoa.cpf;
     this.email = pessoa.email;
     this.mudarAba('editar');
-    this.cdr.detectChanges();
   }
 
   editar(): void {
@@ -107,7 +119,6 @@ export class Pessoa {
         this.limparFormulario();
         this.idBusca = 0;
         this.mudarAba('listar');
-        this.cdr.detectChanges();
       },
       error: (erro) => {
         console.log("Erro ao editar:", erro);
@@ -122,7 +133,6 @@ export class Pessoa {
         next: (resposta) => {
           alert("Pessoa excluída com sucesso!");
           this.listar();
-          this.cdr.detectChanges();
         },
         error: (erro) => {
           console.log("Erro ao deletar:", erro);

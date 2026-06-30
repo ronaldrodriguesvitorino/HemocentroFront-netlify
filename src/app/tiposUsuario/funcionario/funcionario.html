@@ -1,1 +1,218 @@
-<p>funcionario works!</p>
+<div class="gerenciar-container">
+  <div class="header-gerenciar" style="justify-content: space-between;">
+    <h2>Painel Operacional</h2>
+    <button class="btn-perigo" (click)="sair()">Sair do Sistema</button>
+  </div>
+
+  <div class="abas-navegacao">
+    <button [class.ativa]="abaPrincipal === 'doadores'" (click)="mudarAbaPrincipal('doadores')">👥 Doadores</button>
+    <button [class.ativa]="abaPrincipal === 'coletas'" (click)="mudarAbaPrincipal('coletas')">🩸 Gestão de Coletas</button>
+    <button [class.ativa]="abaPrincipal === 'laboratorio'" (click)="mudarAbaPrincipal('laboratorio')">🔬 Laboratório</button>
+  </div>
+
+  <div class="conteudo-aba">
+
+    @if (abaPrincipal === 'doadores') {
+      <div class="aba-card">
+        <h3>Cadastrar Novo Doador</h3>
+        <form class="form-gerenciar" style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+          <div class="form-grupo row">
+            <div style="flex: 1"><label>Nome Completo:</label><input type="text" [(ngModel)]="nome" name="n"></div>
+            <div style="flex: 1"><label>CPF:</label><input type="text" [(ngModel)]="cpf" name="c"></div>
+          </div>
+          <div class="form-grupo row">
+            <div style="flex: 1"><label>E-mail:</label><input type="email" [(ngModel)]="email" name="e"></div>
+            <div style="flex: 1">
+              <label>Hemocentro:</label>
+              <select [(ngModel)]="hemocentroIdDoador" name="h">
+                <option value="undefined" disabled selected>-- Escolha --</option>
+                @for (h of listaHemocentros; track h.id) { <option [value]="h.id">{{h.nome}}</option> }
+              </select>
+            </div>
+          </div>
+          <button type="button" class="btn-sucesso mt-20" (click)="cadastrarDoador()">Salvar e Gerar Acesso</button>
+        </form>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+          <h4 style="margin: 0;">Banco de Doadores</h4>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <label style="font-size: 14px; color: #555;">🔍 Buscar Doador:</label>
+            <input type="text" [(ngModel)]="termoBuscaDoador" placeholder="Nome, CPF ou E-mail" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px; width: 200px;">
+          </div>
+        </div>
+
+        <table class="tabela-dados mt-20">
+          <thead><tr><th>ID</th><th>Nome</th><th>CPF</th><th>E-mail</th></tr></thead>
+          <tbody>
+            @for (d of doadoresFiltrados; track d.id) {
+              <tr><td>{{d.id}}</td><td>{{d.nome}}</td><td>{{d.cpf}}</td><td>{{d.email}}</td></tr>
+            }
+            @if (doadoresFiltrados.length === 0) { <tr><td colspan="4" style="text-align: center; color: #888;">Nenhum doador encontrado.</td></tr> }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (abaPrincipal === 'coletas') {
+      <div class="aba-card">
+        <h3>{{ editandoColeta ? '✏️ Alterar Bolsa de Sangue' : '🩸 Registrar Nova Doação' }}</h3>
+        
+        <form class="form-gerenciar" style="background: #fdf2f2; padding: 20px; border-radius: 8px; border: 1px solid #ffcdd2; margin-bottom: 30px;">
+          <div class="form-grupo row">
+            <div style="flex: 1"><label>Data da Coleta:</label><input type="date" [(ngModel)]="dataColeta" name="dc"></div>
+            <div style="flex: 1"><label>Data de Validade:</label><input type="date" [(ngModel)]="dataValidade" name="dv"></div>
+            <div style="flex: 1">
+              <label>Tipo Sanguíneo:</label>
+              <select [(ngModel)]="tipoSanguineoColeta" name="ts">
+                <option value="" disabled selected>-- Selecione --</option>
+                @for (tipo of listaTiposSanguineos; track tipo.valor) { <option [value]="tipo.valor">{{tipo.label}}</option> }
+              </select>
+            </div>
+          </div>
+          <div class="form-grupo row">
+            <div style="flex: 1">
+              <label>Doador:</label>
+              <select [(ngModel)]="pessoaIdColeta" name="pd">
+                <option value="0" disabled selected>-- Escolha o Doador --</option>
+                @for (d of listaDoadores; track d.id) { <option [value]="d.id">{{d.nome}} (ID: {{d.id}})</option> }
+              </select>
+            </div>
+            <div style="flex: 1">
+              <label>Hemocentro Destino:</label>
+              <select [(ngModel)]="hemocentroIdColeta" name="hc">
+                <option value="0" disabled selected>-- Escolha o Local --</option>
+                @for (h of listaHemocentros; track h.id) { <option [value]="h.id">{{h.nome}}</option> }
+              </select>
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 10px;" class="mt-20">
+            <button type="button" class="btn-sucesso" (click)="salvarColeta()">{{ editandoColeta ? 'Atualizar Bolsa' : 'Salvar Bolsa' }}</button>
+            @if (editandoColeta) { <button type="button" class="btn-perigo" style="width: auto; padding: 0 30px;" (click)="limparFormularioColeta()">Cancelar Edição</button> }
+          </div>
+        </form>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h4 style="margin: 0;">Histórico de Bolsas no Estoque</h4>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <label style="font-size: 14px; color: #555;">🔍 Filtrar:</label>
+            <input type="text" [(ngModel)]="termoBuscaColeta" placeholder="ID, Data, Doador ou Tipo" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px; width: 200px;">
+          </div>
+        </div>
+
+        <table class="tabela-dados">
+          <thead><tr><th>Lote ID</th><th>Data Coleta</th><th>Validade</th><th>Tipo</th><th>Ações</th></tr></thead>
+          <tbody>
+            @for (c of coletasFiltradas; track c.id) {
+              <tr>
+                <td><strong>#{{c.id}}</strong></td><td>{{c.dataColeta}}</td><td>{{c.dataValidade}}</td>
+                <td><span style="color: #d32f2f; font-weight: bold;">{{c.tipoSanguineo || 'Não Definido'}}</span></td>
+                <td>
+                  <button class="btn-tabela-editar" (click)="prepararEdicaoColeta(c)">✏️ Editar</button>
+                  <button class="btn-tabela-deletar" (click)="excluirColeta(c.id)">🗑️ Deletar</button>
+                </td>
+              </tr>
+            }
+            @if (coletasFiltradas.length === 0) { <tr><td colspan="5" style="text-align: center; color: #888;">Nenhuma coleta encontrada.</td></tr> }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (abaPrincipal === 'laboratorio') {
+      <div class="aba-card">
+        <h3>Controle Laboratorial</h3>
+        <p style="color: #666; margin-bottom: 20px;">Selecione uma bolsa de sangue na tabela à esquerda para lançar os resultados dos exames.</p>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+          
+          <div style="flex: 1; min-width: 300px;">
+            <input type="text" [(ngModel)]="termoBuscaLab" placeholder="🔍 Buscar Lote ID ou Data..." style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; margin-bottom: 10px; box-sizing: border-box;">
+            
+            <table class="tabela-dados">
+              <thead><tr><th>Lote ID</th><th>Data</th><th>Ação</th></tr></thead>
+              <tbody>
+                @for (c of coletasLabFiltradas; track c.id) {
+                  <tr [style.background]="coletaSelecionada?.id === c.id ? '#e3f2fd' : 'none'">
+                    <td><strong>#{{c.id}}</strong></td><td>{{c.dataColeta}}</td>
+                    <td><button class="btn-acao" style="font-size: 11px; padding: 5px 10px;" (click)="abrirExames(c)">🔬 Ver Exames</button></td>
+                  </tr>
+                }
+                @if (coletasLabFiltradas.length === 0) { <tr><td colspan="3" style="text-align: center; color: #888;">Nenhum lote.</td></tr> }
+              </tbody>
+            </table>
+          </div>
+
+          <div style="flex: 1.5; min-width: 400px; border-left: 2px solid #eee; padding-left: 20px;">
+            @if (!coletaSelecionada) {
+              <div style="padding: 40px; text-align: center; background: #f5f5f5; border-radius: 8px;">
+                <p style="color: #888; font-size: 16px;">Nenhuma coleta selecionada.</p>
+              </div>
+            }
+
+            @if (coletaSelecionada) {
+              <h4 style="margin-top: 0; color: #1565c0;">Lote Selecionado: #{{coletaSelecionada.id}}</h4>
+              
+              <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; border: 1px dashed #ccc; margin-bottom: 20px;">
+                <h5 style="margin-top: 0; color: #555;">Adicionar Novos Exames:</h5>
+                @if (examesDisponiveisParaLancar.length === 0) {
+                  <p style="color: green; font-size: 13px; margin: 0;">✔️ Todos os exames do catálogo já foram lançados.</p>
+                } @else {
+                  <table class="tabela-dados" style="background: white; font-size: 13px;">
+                    <tbody>
+                      @for (ex of examesDisponiveisParaLancar; track ex.id) {
+                        <tr>
+                          <td style="width: 40px; text-align: center;"><input type="checkbox" [(ngModel)]="ex.selecionado"></td>
+                          <td>{{ex.nome}}</td>
+                          <td>
+                            <select [(ngModel)]="ex.situacao" [disabled]="!ex.selecionado" style="padding: 2px;">
+                              <option value="PENDENTE">Pendente</option>
+                              <option value="NEGATIVO">Negativo</option>
+                              <option value="POSITIVO">Positivo</option>
+                            </select>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                  <button type="button" class="btn-sucesso" style="font-size: 13px; padding: 6px; margin-top: 10px;" (click)="salvarExamesEmMassa()">Salvar Marcados</button>
+                }
+              </div>
+
+              <h5 style="color: #555;">Resultados Emitidos:</h5>
+              <table class="tabela-dados" style="font-size: 13px;">
+                <thead><tr><th>Exame</th><th>Situação</th><th>Alterar</th></tr></thead>
+                <tbody>
+                  @for (ec of examesDestaColeta; track ec.id) {
+                    <tr>
+                      <td>{{ec.nome}}</td>
+                      <td>
+                        @if (!ec.editando) { <span class="badge-perfil" [style.background]="ec.situacao === 'NEGATIVO' ? '#c8e6c9' : (ec.situacao === 'POSITIVO' ? '#ffcdd2' : '#eee')">{{ec.situacao}}</span> }
+                        @if (ec.editando) {
+                          <select [(ngModel)]="ec.novaSituacao">
+                            <option value="PENDENTE">Pendente</option>
+                            <option value="NEGATIVO">Negativo</option>
+                            <option value="POSITIVO">Positivo</option>
+                          </select>
+                        }
+                      </td>
+                      <td>
+                        @if (!ec.editando) { <button class="btn-tabela-editar" style="padding: 2px 6px; font-size: 11px;" (click)="habilitarEdicaoExame(ec)">✏️</button> }
+                        @else {
+                          <button class="btn-sucesso" style="padding: 2px 6px; font-size: 11px; width: auto;" (click)="salvarEdicaoExame(ec)">✔️</button>
+                          <button class="btn-tabela-deletar" style="padding: 2px 6px; font-size: 11px;" (click)="cancelarEdicaoExame(ec)">❌</button>
+                        }
+                      </td>
+                    </tr>
+                  }
+                  @if (examesDestaColeta.length === 0) { <tr><td colspan="3" style="text-align: center; color: #888;">Nenhum resultado registrado.</td></tr> }
+                </tbody>
+              </table>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

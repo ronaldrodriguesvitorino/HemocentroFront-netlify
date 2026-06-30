@@ -15,7 +15,7 @@ export class Usuario {
   idBusca!: number;
   busca: any;
   
-  // Listas para a tabela e para os Dropdowns 
+  // Listas
   listaUsuarios: any[] = [];
   listaPessoas: any[] = [];
   listaHemocentros: any[] = [];
@@ -27,6 +27,19 @@ export class Usuario {
   tipoPerfil!: string;
   pessoaId!: number;
   hemocentroId!: number;
+
+  // NOVIDADE: Motor de Busca Reativo
+  termoBusca: string = '';
+
+  get usuariosFiltrados() {
+    if (!this.termoBusca) return this.listaUsuarios;
+    const t = this.termoBusca.toLowerCase();
+    return this.listaUsuarios.filter(u => 
+      u.id.toString().includes(t) || 
+      (u.login && u.login.toLowerCase().includes(t)) || 
+      (u.tipoPerfil && u.tipoPerfil.toLowerCase().includes(t))
+    );
+  }
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router) {
     this.listarTudo();
@@ -43,25 +56,18 @@ export class Usuario {
     }
   }
 
-  // Carrega todos os dados necessários para a tela funcionar
   listarTudo(): void {
-    //busca o usuário
     this.http.get<any[]>('http://localhost:8080/usuario').subscribe(resUsuarios => {
       this.listaUsuarios = resUsuarios;
 
-      //busca as pessoas
       this.http.get<any[]>('http://localhost:8080/pessoa').subscribe(resPessoas => {
         this.listaPessoas = resPessoas;
 
-        // FILTRO: 
-        // Verifica que não está na lista de pessoa já atribuidas
         this.listaPessoasDisponiveis = this.listaPessoas.filter(pessoa => {
           const pessoaJaTemAcesso = this.listaUsuarios.some(usuario => {
             const idVinculado = usuario.pessoa ? usuario.pessoa.id : usuario.pessoaId;
             return idVinculado === pessoa.id;
           });
-          
-          // Se não tem acesso, retorna true para manter na lista do Dropdown
           return !pessoaJaTemAcesso;
         });
 
@@ -69,7 +75,6 @@ export class Usuario {
       });
     });
 
-    //Busca os Hemocentros 
     this.http.get<any[]>('http://localhost:8080/hemocentro').subscribe(resHemocentros => {
       this.listaHemocentros = resHemocentros;
       this.cdr.detectChanges();
@@ -107,7 +112,6 @@ export class Usuario {
         alert("Usuário cadastrado com sucesso!");
         this.limparFormulario();
         this.mudarAba('listar');
-        this.cdr.detectChanges();
       },
       error: (erro) => {
         console.log("Erro ao criar:", erro);
@@ -122,12 +126,10 @@ export class Usuario {
     this.senha = ""; // vazio por segurança
     this.tipoPerfil = usuario.tipoPerfil;
     
-    //Linha para evitar que volte um objeto, e não uma ID
     this.pessoaId = usuario.pessoa ? usuario.pessoa.id : usuario.pessoaId;
     this.hemocentroId = usuario.hemocentro ? usuario.hemocentro.id : usuario.hemocentroId;
 
     this.mudarAba('editar');
-    this.cdr.detectChanges();
   }
 
   editar(): void {
@@ -145,7 +147,6 @@ export class Usuario {
         this.limparFormulario();
         this.idBusca = 0;
         this.mudarAba('listar');
-        this.cdr.detectChanges();
       },
       error: (erro) => {
         console.log("Erro ao editar:", erro);
@@ -161,7 +162,6 @@ export class Usuario {
         next: (resposta) => {
           alert("Usuário excluído com sucesso!");
           this.listarTudo();
-          this.cdr.detectChanges();
         },
         error: (erro) => {
           console.log("Erro ao deletar:", erro);

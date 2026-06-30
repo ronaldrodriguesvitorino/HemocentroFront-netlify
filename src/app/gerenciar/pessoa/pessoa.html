@@ -6,7 +6,7 @@
 
   <div class="abas-navegacao">
     <button [class.ativa]="abaAtual === 'listar'" (click)="mudarAba('listar')">📄 Listar Todos</button>
-    <button [class.ativa]="abaAtual === 'buscar'" (click)="mudarAba('buscar')">🔍 Buscar (Por ID)</button>
+    <button [class.ativa]="abaAtual === 'buscar'" (click)="mudarAba('buscar')">🔍 Buscar Específico (ID)</button>
     <button [class.ativa]="abaAtual === 'criar'" (click)="mudarAba('criar')">➕ Cadastrar Nova</button>
   </div>
 
@@ -14,7 +14,16 @@
 
     @if (abaAtual === 'listar') {
       <div class="aba-card">
-        <h3>Lista de Pessoas Cadastradas</h3>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h3 style="margin: 0;">Lista de Pessoas Cadastradas</h3>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <label style="font-size: 14px; color: #555;">🔍 Filtrar:</label>
+            <input type="text" [(ngModel)]="termoBusca" placeholder="ID, Nome, CPF ou E-mail..." 
+                   style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 250px;">
+          </div>
+        </div>
+
         <table class="tabela-dados">
           <thead>
             <tr>
@@ -26,10 +35,10 @@
             </tr>
           </thead>
           <tbody>
-            @for (pessoa of listaPessoas; track pessoa.id){
+            @for (pessoa of pessoasFiltradas; track pessoa.id){
               <tr>
                 <td>{{pessoa.id}}</td>
-                <td>{{pessoa.nome}}</td>
+                <td><strong>{{pessoa.nome}}</strong></td>
                 <td>{{pessoa.cpf}}</td>
                 <td>{{pessoa.email}}</td>
                 <td style="text-align: center;">
@@ -38,6 +47,9 @@
                 </td>
               </tr>
             }
+            @if (pessoasFiltradas.length === 0) {
+              <tr><td colspan="5" style="text-align: center; color: #888;">Nenhuma pessoa encontrada na busca.</td></tr>
+            }
           </tbody>
         </table>
       </div>
@@ -45,14 +57,14 @@
 
     @if (abaAtual === 'buscar') {
       <div class="aba-card">
-        <h3>Buscar Pessoa</h3>
+        <h3>Buscar Pessoa pelo ID </h3>
         <div class="form-grupo row">
-          <input type="number" [(ngModel)]="idBusca" name="idBusca" placeholder="Digite o ID da Pessoa">
+          <input type="number" [(ngModel)]="idBusca" name="idBusca" placeholder="Digite o ID exato da Pessoa">
           <button type="button" class="btn-acao" (click)="buscar()">Buscar</button>
         </div>
         
         @if (busca) {
-          <div class="resultado-box">
+          <div class="resultado-box mt-20" style="background: #f5f5f5; padding: 15px; border-radius: 5px;">
             <p><strong>ID:</strong> {{busca.id}}</p>
             <p><strong>Nome:</strong> {{busca.nome}}</p>
             <p><strong>CPF:</strong> {{busca.cpf}}</p>
@@ -99,7 +111,11 @@
             <label>E-mail:</label>
             <input type="email" [(ngModel)]="email" name="emailEditar">
           </div>
-          <button type="button" class="btn-sucesso mt-20" (click)="editar()">Atualizar Dados</button>
+
+          <div style="display: flex; gap: 10px;" class="mt-20">
+            <button type="button" class="btn-sucesso" (click)="editar()">Atualizar Dados</button>
+            <button type="button" class="btn-perigo" style="width: auto; padding: 0 20px;" (click)="limparFormulario(); mudarAba('listar')">Cancelar</button>
+          </div>
         </form>
       </div>
     }
