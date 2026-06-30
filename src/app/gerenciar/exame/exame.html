@@ -1,1 +1,52 @@
-<p>exame works!</p>
+<div class="gerenciar-container">
+  <div class="header-gerenciar">
+    <button class="btn-voltar" (click)="voltarParaPainel()">← Voltar ao Painel</button>
+    <h2>Catálogo de Exames</h2>
+  </div>
+
+  <div class="abas-navegacao">
+    <button [class.ativa]="abaAtual === 'listar'" (click)="mudarAba('listar')">📄 Listar Todos</button>
+    <button [class.ativa]="abaAtual === 'criar'" (click)="mudarAba('criar')">➕ Novo Exame</button>
+  </div>
+
+  <div class="conteudo-aba">
+    @if (abaAtual === 'listar') {
+      <div class="aba-card">
+        <h3>Exames Padrões do Hemocentro</h3>
+        <table class="tabela-dados">
+          <thead>
+            <tr><th>ID</th><th>Nome</th><th>Descrição</th><th style="text-align: center;">Ações</th></tr>
+          </thead>
+          <tbody>
+            @for (exame of listaExames; track exame.id) {
+              <tr>
+                <td>{{exame.id}}</td><td><strong>{{exame.nome}}</strong></td><td>{{exame.descricao}}</td>
+                <td style="text-align: center;">
+                  <button class="btn-tabela-editar" (click)="prepararEdicao(exame)">✏️ Editar</button>
+                  <button class="btn-tabela-deletar" (click)="deletarComConfirmacao(exame.id, exame.nome)">🗑️</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (abaAtual === 'criar' || abaAtual === 'editar') {
+      <div class="aba-card">
+        <h3>{{ abaAtual === 'criar' ? 'Cadastrar Novo Exame' : 'Editar Exame' }}</h3>
+        <form class="form-gerenciar">
+          <div class="form-grupo">
+            <label>Sigla/Nome do Exame:</label>
+            <input type="text" [(ngModel)]="nome" name="nome">
+          </div>
+          <div class="form-grupo">
+            <label>Descrição Detalhada:</label>
+            <input type="text" [(ngModel)]="descricao" name="descricao">
+          </div>
+          <button type="button" class="btn-sucesso mt-20" (click)="abaAtual === 'criar' ? criar() : editar()">Salvar</button>
+        </form>
+      </div>
+    }
+  </div>
+</div>

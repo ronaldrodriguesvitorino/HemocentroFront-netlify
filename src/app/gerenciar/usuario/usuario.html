@@ -1,1 +1,139 @@
-<p>usuario works!</p>
+<div class="gerenciar-container">
+  <div class="header-gerenciar">
+    <button class="btn-voltar" (click)="voltarParaPainel()">← Voltar ao Painel</button>
+    <h2>Gerenciamento de Acessos (Usuários)</h2>
+  </div>
+
+  <div class="abas-navegacao">
+    <button [class.ativa]="abaAtual === 'listar'" (click)="mudarAba('listar')">📄 Listar Todos</button>
+    <button [class.ativa]="abaAtual === 'buscar'" (click)="mudarAba('buscar')">🔍 Buscar</button>
+    <button [class.ativa]="abaAtual === 'criar'" (click)="mudarAba('criar')">➕ Conceder Acesso</button>
+  </div>
+
+  <div class="conteudo-aba">
+
+    @if (abaAtual === 'listar') {
+      <div class="aba-card">
+        <h3>Lista de Usuários com Acesso</h3>
+        <table class="tabela-dados">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Login</th>
+              <th>Perfil</th>
+              <th style="text-align: center;">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (usuario of listaUsuarios; track usuario.id){
+              <tr>
+                <td>{{usuario.id}}</td>
+                <td><strong>{{usuario.login}}</strong></td>
+                <td><span class="badge-perfil">{{usuario.tipoPerfil}}</span></td>
+                <td style="text-align: center;">
+                  <button type="button" class="btn-tabela-editar" (click)="prepararEdicao(usuario)">✏️ Editar</button>
+                  <button type="button" class="btn-tabela-deletar" (click)="deletarComConfirmacao(usuario.id, usuario.login)">🗑️ Revogar</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (abaAtual === 'buscar') {
+      <div class="aba-card">
+        <h3>Buscar Usuário</h3>
+        <div class="form-grupo row">
+          <input type="number" [(ngModel)]="idBusca" name="idBusca" placeholder="Digite o ID do Usuário">
+          <button type="button" class="btn-acao" (click)="buscar()">Buscar</button>
+        </div>
+        
+        @if (busca) {
+          <div class="resultado-box">
+            <p><strong>ID:</strong> {{busca.id}}</p>
+            <p><strong>Login:</strong> {{busca.login}}</p>
+            <p><strong>Perfil:</strong> {{busca.tipoPerfil}}</p>
+          </div>
+        }
+      </div>
+    }
+
+    @if (abaAtual === 'criar') {
+      <div class="aba-card">
+        <h3>Conceder Novo Acesso</h3>
+        <form class="form-gerenciar">
+          
+          <div class="form-grupo">
+            <label>Vincular a qual Pessoa?</label>
+            <select [(ngModel)]="pessoaId" name="pessoaId">
+              <option value="0" disabled selected>-- Selecione uma Pessoa --</option>
+              @for (pessoa of listaPessoasDisponiveis; track pessoa.id) {
+                <option [value]="pessoa.id">{{pessoa.nome}} (CPF: {{pessoa.cpf}})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-grupo">
+            <label>Vincular a qual Hemocentro?</label>
+            <select [(ngModel)]="hemocentroId" name="hemocentroId">
+              <option value="0" disabled selected>-- Selecione o Hemocentro --</option>
+              @for (hemo of listaHemocentros; track hemo.id) {
+                <option [value]="hemo.id">{{hemo.nome}}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-grupo row">
+            <div style="flex: 1;">
+              <label>Login de Acesso:</label>
+              <input type="text" [(ngModel)]="login" name="login" placeholder="Ex: joao.silva">
+            </div>
+            <div style="flex: 1;">
+              <label>Senha:</label>
+              <input type="password" [(ngModel)]="senha" name="senha" placeholder="Digite a senha inicial">
+            </div>
+          </div>
+
+          <div class="form-grupo">
+            <label>Nível de Permissão (Perfil):</label>
+            <select [(ngModel)]="tipoPerfil" name="tipoPerfil">
+              <option value="" disabled selected>-- Selecione o Perfil --</option>
+              <option value="USUARIO">Doador (Usuário Comum)</option>
+              <option value="FUNCIONARIO">Funcionário</option>
+              <option value="GERENTE">Gerente do Sistema</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn-sucesso mt-20" (click)="criar()">Criar Usuário</button>
+        </form>
+      </div>
+    }
+
+    @if (abaAtual === 'editar') {
+      <div class="aba-card">
+        <h3>Editar Usuário</h3>
+        <form class="form-gerenciar mt-20">
+          
+          <div class="form-grupo row">
+            <div style="flex: 1;">
+              <label>Nova Senha (Obrigatória):</label>
+              <input type="password" [(ngModel)]="senha" name="senhaEditar" placeholder="Digite a nova senha">
+            </div>
+            <div style="flex: 1;">
+              <label>Nível de Permissão:</label>
+              <select [(ngModel)]="tipoPerfil" name="tipoPerfilEditar">
+                <option value="USUARIO">Doador (Usuário Comum)</option>
+                <option value="FUNCIONARIO">Funcionário</option>
+                <option value="GERENTE">Gerente do Sistema</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="button" class="btn-sucesso mt-20" (click)="editar()">Atualizar Usuário</button>
+        </form>
+      </div>
+    }
+
+  </div>
+</div>

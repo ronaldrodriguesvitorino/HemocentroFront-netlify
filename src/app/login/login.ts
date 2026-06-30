@@ -16,6 +16,7 @@ export class Login {
   entrar(){
     this.authService.fazerLogin(this.cpf, this.senha).subscribe({
       next: (resposta: any) => {
+        console.log("DEU CERTO, RESPOSTA DO SPRING:", resposta);
         localStorage.setItem('usuarioLogado', JSON.stringify(resposta));
         if(resposta.tipoPerfil === 'GERENTE'){
           this.router.navigate(['/gerente']);
@@ -26,8 +27,11 @@ export class Login {
         }
       },
       error: (erro) => {
-
+        console.error("ERRO AO LOGAR:", erro);
       }
+      
     });
   }
+  
 }
+

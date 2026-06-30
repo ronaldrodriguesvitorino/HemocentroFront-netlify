@@ -1,1 +1,174 @@
-<p>coleta works!</p>
+<div class="gerenciar-container">
+  <div class="header-gerenciar">
+    <button class="btn-voltar" (click)="voltarParaPainel()">← Voltar</button>
+    <h2>Gerenciar Coletas e Tipagem</h2>
+  </div>
+
+  <div class="abas-navegacao">
+    <button [class.ativa]="abaAtual === 'listar'" (click)="mudarAba('listar')">📄 Estoque de Coletas</button>
+    <button [class.ativa]="abaAtual === 'criar'" (click)="mudarAba('criar')">🩸 Nova Doação (Coleta)</button>
+  </div>
+
+  <div class="conteudo-aba">
+
+    @if (abaAtual === 'listar') {
+      <div class="aba-card">
+        <h3>Bolsas Coletadas</h3>
+        <table class="tabela-dados">
+          <thead>
+            <tr><th>Lote ID</th><th>Data Coleta</th><th>Vencimento</th><th>Doador (ID)</th><th style="text-align: center;">Ações Laboratoriais</th></tr>
+          </thead>
+          <tbody>
+            @for (c of listaColetas; track c.id) {
+              <tr>
+                <td>{{c.id}}</td><td>{{c.dataColeta}}</td><td>{{c.dataValidade}}</td><td>Pessoa: {{c.pessoaId}}</td>
+                <td style="text-align: center;">
+                  <button class="btn-acao" style="font-size: 12px" (click)="abrirGerenciadorDeExames(c)">🔬 Lançar Exames</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (abaAtual === 'criar') {
+      <div class="aba-card">
+        <h3>Registrar Nova Doação</h3>
+        <form class="form-gerenciar">
+          <div class="form-grupo row">
+            <div style="flex: 1">
+              <label>Data da Coleta:</label>
+              <input type="date" [(ngModel)]="dataColeta" name="dataC">
+            </div>
+            <div style="flex: 1">
+              <label>Válido Até:</label>
+              <input type="date" [(ngModel)]="dataValidade" name="dataV">
+            </div>
+          </div>
+          <div class="form-grupo row">
+            <div style="flex: 1">
+              <label>Doador (Pessoa):</label>
+              <select [(ngModel)]="pessoaId" name="pessoaId">
+                <option value="undefined" disabled selected>-- Selecione --</option>
+                @for (p of listaPessoas; track p.id) { <option [value]="p.id">{{p.nome}}</option> }
+              </select>
+            </div>
+            <div style="flex: 1">
+              <label>Local (Hemocentro):</label>
+              <select [(ngModel)]="hemocentroId" name="hemocentroId">
+                <option value="undefined" disabled selected>-- Selecione --</option>
+                @for (h of listaHemocentros; track h.id) { <option [value]="h.id">{{h.nome}}</option> }
+              </select>
+            </div>
+          </div>
+          <button type="button" class="btn-sucesso mt-20" (click)="criarColeta()">Salvar Coleta</button>
+        </form>
+      </div>
+    }
+
+    @if (abaAtual === 'exames-coleta') {
+      <div class="aba-card" style="border-top: 4px solid #d32f2f;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3>Gestão Laboratorial - Lote #{{coletaSelecionada?.id}}</h3>
+          <button class="btn-voltar" (click)="mudarAba('listar')">X Fechar</button>
+        </div>
+        <p>Data de Coleta: {{coletaSelecionada?.dataColeta}}</p>
+
+        <h4 class="mt-20">Lançar Novos Exames:</h4>
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 30px;">
+          @if (examesDisponiveisParaLancar.length === 0) {
+            <p style="color: #2e7d32; font-weight: bold;">✔️ Todos os exames disponíveis já foram lançados para esta coleta!</p>
+          } @else {
+            <table class="tabela-dados" style="background: white;">
+              <thead>
+                <tr>
+                  <th style="width: 80px; text-align: center;">Incluir</th>
+                  <th>Exame</th>
+                  <th>Definir Situação / Resultado</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (ex of examesDisponiveisParaLancar; track ex.id) {
+                  <tr>
+                    <td style="text-align: center;">
+                      <input type="checkbox" [(ngModel)]="ex.selecionado" style="transform: scale(1.5); cursor: pointer;">
+                    </td>
+                    <td>{{ex.nome}}</td>
+                    <td>
+                      <select [(ngModel)]="ex.situacao" [disabled]="!ex.selecionado">
+                        <option value="PENDENTE">Pendente</option>
+                        <option value="NEGATIVO">Negativo (Apto / Não Reagente)</option>
+                        <option value="POSITIVO">Positivo (Inapto / Reagente)</option>
+                        <option value="A_POSITIVO">A+</option>
+                        <option value="A_NEGATIVO">A-</option>
+                        <option value="B_POSITIVO">B+</option>
+                        <option value="B_NEGATIVO">B-</option>
+                        <option value="AB_POSITIVO">AB+</option>
+                        <option value="AB_NEGATIVO">AB-</option>
+                        <option value="O_POSITIVO">O+</option>
+                        <option value="O_NEGATIVO">O-</option>
+                      </select>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <button type="button" class="btn-sucesso mt-20" (click)="salvarExamesEmMassa()">+ Salvar Todos os Marcados</button>
+          }
+        </div>
+
+        <h4>Resultados Já Cadastrados:</h4>
+        <table class="tabela-dados">
+          <thead>
+            <tr><th>Exame</th><th>Situação / Resultado Atual</th><th style="text-align: center;">Ações</th></tr>
+          </thead>
+          <tbody>
+            @for (ec of examesDestaColeta; track ec.id) {
+              <tr>
+                <td><strong>{{ec.nome}}</strong></td>
+                
+                <td>
+                  @if (!ec.editando) {
+                    <span class="badge-perfil" [style.background]="ec.situacao === 'NEGATIVO' ? '#c8e6c9' : (ec.situacao === 'POSITIVO' ? '#ffcdd2' : '#e0e0e0')">
+                      {{ec.situacao}}
+                    </span>
+                  }
+                  
+                  @if (ec.editando) {
+                    <select [(ngModel)]="ec.novaSituacao" style="padding: 5px;">
+                      <option value="PENDENTE">Pendente</option>
+                      <option value="NEGATIVO">Negativo</option>
+                      <option value="POSITIVO">Positivo</option>
+                      <option value="A_POSITIVO">A+</option>
+                      <option value="A_NEGATIVO">A-</option>
+                      <option value="B_POSITIVO">B+</option>
+                      <option value="B_NEGATIVO">B-</option>
+                      <option value="AB_POSITIVO">AB+</option>
+                      <option value="AB_NEGATIVO">AB-</option>
+                      <option value="O_POSITIVO">O+</option>
+                      <option value="O_NEGATIVO">O-</option>
+                    </select>
+                  }
+                </td>
+                
+                <td style="text-align: center;">
+                  @if (!ec.editando) {
+                    <button class="btn-tabela-editar" (click)="habilitarEdicao(ec)">✏️ Modificar</button>
+                  } @else {
+                    <button class="btn-tabela-editar" style="background: #2e7d32" (click)="salvarEdicao(ec)">✔️ OK</button>
+                    <button class="btn-tabela-deletar" (click)="cancelarEdicao(ec)">❌</button>
+                  }
+                </td>
+              </tr>
+            }
+            @if (examesDestaColeta.length === 0) {
+              <tr><td colspan="3" style="text-align: center; color: #888;">Nenhum exame lançado ainda.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+  </div>
+</div>
