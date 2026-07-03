@@ -20,13 +20,6 @@ export class Gerente {
     }
 
     const usuarioLogado = JSON.parse(usuarioString);
-
-    if (usuarioLogado.tipoPerfil !== 'GERENTE') {
-      alert("Acesso negado: Esta página é exclusiva para administradores/gerentes.");
-      this.sair();
-      return;
-    }
-
     this.meuPessoaId = usuarioLogado.pessoaId;
 
     if (!this.meuPessoaId) {

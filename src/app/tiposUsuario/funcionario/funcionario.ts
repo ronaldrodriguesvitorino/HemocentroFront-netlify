@@ -86,14 +86,6 @@ export class Funcionario {
     }
 
     const usuarioLogado = JSON.parse(usuarioString);
-
-    if (usuarioLogado.tipoPerfil !== 'DOADOR') {
-      alert("Acesso negado: Esta página é exclusiva para doadores.");
-      this.sair();
-      return;
-    }
-
-
     this.meuPessoaId = usuarioLogado.pessoaId;
 
     if (!this.meuPessoaId) {
