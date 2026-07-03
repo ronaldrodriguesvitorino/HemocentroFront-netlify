@@ -1,10 +1,15 @@
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+
 [[redirects]]
   from = "/api/*"
   to = "https://hemocentroback.onrender.com/:splat"
   status = 200
   force = true
   [redirects.headers]
-    X-From-Netlify = "true"
+    X-Forwarded-Host = "hemocentroback.onrender.com"
 
 [[redirects]]
   from = "/*"
