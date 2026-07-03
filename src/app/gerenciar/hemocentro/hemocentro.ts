@@ -33,13 +33,6 @@ export class Hemocentro {
     }
 
     const usuarioLogado = JSON.parse(usuarioString);
-
-    if (usuarioLogado.tipoPerfil !== 'GERENTE') {
-      alert("Acesso negado: Esta página é exclusiva para administradores/gerentes.");
-      this.sair();
-      return;
-    }
-
     this.meuPessoaId = usuarioLogado.pessoaId;
 
     if (!this.meuPessoaId) {
@@ -67,7 +60,7 @@ export class Hemocentro {
     }
   }
   buscar(): void {
-    this.http.get('https://hemocentroback.onrender.com/hemocentro/' + this.idBusca).subscribe({
+    this.http.get('http://localhost:8080/hemocentro/' + this.idBusca).subscribe({
       next: (resposta: any) => {
         this.busca = resposta;
 
@@ -105,7 +98,7 @@ export class Hemocentro {
   }
 
   listar(): void {
-    this.http.get<any[]>('https://hemocentroback.onrender.com/hemocentro').subscribe({
+    this.http.get<any[]>('http://localhost:8080/hemocentro').subscribe({
       next: (resposta) => {
         this.listaHemocentros = resposta;
         this.cdr.detectChanges();
@@ -122,7 +115,7 @@ export class Hemocentro {
       descricao: this.descricao
     };
 
-    this.http.put('https://hemocentroback.onrender.com/hemocentro/' + this.idBusca, request).subscribe({
+    this.http.put('http://localhost:8080/hemocentro/' + this.idBusca, request).subscribe({
       next: (resposta) => {
         this.nome = "";
         this.descricao = "";
@@ -141,7 +134,7 @@ export class Hemocentro {
       return;
     }
 
-    this.http.delete('https://hemocentroback.onrender.com/hemocentro/' + id).subscribe({
+    this.http.delete('http://localhost:8080/hemocentro/' + id).subscribe({
       next: (resposta) => {
         alert("Hemocentro deletado com sucesso!");
         this.idBusca = 0;
@@ -159,7 +152,7 @@ export class Hemocentro {
       nome: this.nome,
       descricao: this.descricao
     }
-    this.http.post('https://hemocentroback.onrender.com/hemocentro', request).subscribe({
+    this.http.post('http://localhost:8080/hemocentro', request).subscribe({
       next: (resposta) => {
         this.nome = "";
         this.descricao = "";
@@ -175,7 +168,7 @@ export class Hemocentro {
     const confirmou = confirm(`Tem certeza absoluta que deseja excluir o hemocentro "${nome}"?`);
 
     if (confirmou) {
-      this.http.delete('https://hemocentroback.onrender.com/hemocentro/' + id).subscribe({
+      this.http.delete('http://localhost:8080/hemocentro/' + id).subscribe({
         next: (resposta) => {
           alert("Hemocentro excluído com sucesso!");
           this.listar();
