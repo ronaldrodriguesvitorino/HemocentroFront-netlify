@@ -24,6 +24,13 @@ export class Doador {
     }
 
     const usuarioLogado = JSON.parse(usuarioString);
+
+    if (usuarioLogado.tipoPerfil !== 'DOADOR') {
+      alert("Acesso negado: Esta página é exclusiva para doadores.");
+      this.sair();
+      return;
+    }
+
     this.meuPessoaId = usuarioLogado.pessoaId;
 
     if (!this.meuPessoaId) {
@@ -45,7 +52,7 @@ export class Doador {
   buscarMinhasDoacoes() {
     this.coletaAbertaId = 0;
     this.examesDaColetaAberta = [];
-    this.http.get<any[]>('http://localhost:8080/coleta').subscribe(res => {
+    this.http.get<any[]>('https://hemocentroback.onrender.com/coleta').subscribe(res => {
       // FILTRO DE SEGURANÇA: O Doador só enxerga as coletas que têm o ID de Pessoa dele!
       this.minhasColetas = res.filter(coleta => coleta.pessoaId === this.meuPessoaId);
       this.cdr.detectChanges();
@@ -59,7 +66,7 @@ export class Doador {
     }
 
     this.coletaAbertaId = coletaId;
-    this.http.get<any[]>('http://localhost:8080/exameColeta?coletaId=' + coletaId).subscribe(res => {
+    this.http.get<any[]>('https://hemocentroback.onrender.com/exameColeta?coletaId=' + coletaId).subscribe(res => {
       this.examesDaColetaAberta = res;
       this.cdr.detectChanges();
     });

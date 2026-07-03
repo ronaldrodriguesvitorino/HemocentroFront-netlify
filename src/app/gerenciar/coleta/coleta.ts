@@ -53,6 +53,13 @@ export class Coleta {
     }
 
     const usuarioLogado = JSON.parse(usuarioString);
+
+    if (usuarioLogado.tipoPerfil !== 'GERENTE') {
+      alert("Acesso negado: Esta página é exclusiva para administradores/gerentes.");
+      this.sair();
+      return;
+    }
+
     this.meuPessoaId = usuarioLogado.pessoaId;
 
     if (!this.meuPessoaId) {
@@ -79,13 +86,13 @@ export class Coleta {
   }
 
   carregarDadosBase() {
-    this.http.get<any[]>('http://localhost:8080/pessoa').subscribe(res => this.listaPessoas = res);
-    this.http.get<any[]>('http://localhost:8080/hemocentro').subscribe(res => this.listaHemocentros = res);
-    this.http.get<any[]>('http://localhost:8080/exame').subscribe(res => this.listaExamesGerais = res);
+    this.http.get<any[]>('https://hemocentroback.onrender.com/pessoa').subscribe(res => this.listaPessoas = res);
+    this.http.get<any[]>('https://hemocentroback.onrender.com/hemocentro').subscribe(res => this.listaHemocentros = res);
+    this.http.get<any[]>('https://hemocentroback.onrender.com/exame').subscribe(res => this.listaExamesGerais = res);
   }
 
   listar() {
-    this.http.get<any[]>('http://localhost:8080/coleta').subscribe(res => {
+    this.http.get<any[]>('https://hemocentroback.onrender.com/coleta').subscribe(res => {
       this.listaColetas = res;
       this.cdr.detectChanges();
     });
@@ -130,7 +137,7 @@ export class Coleta {
     };
 
     if (this.editandoColeta) {
-      this.http.put('http://localhost:8080/coleta/' + this.idColetaEdicao, request).subscribe({
+      this.http.put('https://hemocentroback.onrender.com/coleta/' + this.idColetaEdicao, request).subscribe({
         next: () => {
           alert("Coleta atualizada!");
           this.limparFormularioColeta();
@@ -138,7 +145,7 @@ export class Coleta {
         }
       });
     } else {
-      this.http.post('http://localhost:8080/coleta', request).subscribe({
+      this.http.post('https://hemocentroback.onrender.com/coleta', request).subscribe({
         next: () => {
           alert("Bolsa de sangue cadastrada!");
           this.limparFormularioColeta();
@@ -161,7 +168,7 @@ export class Coleta {
 
   excluirColeta(id: number) {
     if (confirm(`Excluir permanentemente a coleta #${id}?`)) {
-      this.http.delete('http://localhost:8080/coleta/' + id).subscribe({
+      this.http.delete('https://hemocentroback.onrender.com/coleta/' + id).subscribe({
         next: () => {
           alert("Coleta excluída!");
           if (this.coletaSelecionada?.id === id) this.coletaSelecionada = null;
@@ -189,7 +196,7 @@ export class Coleta {
   }
 
   carregarExamesDaColeta(coletaId: number) {
-    this.http.get<any[]>('http://localhost:8080/exameColeta?coletaId=' + coletaId).subscribe({
+    this.http.get<any[]>('https://hemocentroback.onrender.com/exameColeta?coletaId=' + coletaId).subscribe({
       next: (res) => {
         this.examesDestaColeta = res.map(exame => ({ ...exame, editando: false, novaSituacao: exame.situacao }));
         this.atualizarListaDeCheckboxes();
@@ -215,7 +222,7 @@ export class Coleta {
     let reqs = 0;
     marcados.forEach(exame => {
       const request = { exameId: exame.id, situacao: exame.situacao, coletaId: this.coletaSelecionada.id };
-      this.http.post('http://localhost:8080/exameColeta', request).subscribe({
+      this.http.post('https://hemocentroback.onrender.com/exameColeta', request).subscribe({
         next: () => {
           reqs++;
           if (reqs === marcados.length) {
@@ -233,7 +240,7 @@ export class Coleta {
   salvarEdicao(ec: any) {
     const exOriginal = this.listaExamesGerais.find(e => e.nome === ec.nome);
     const req = { exameId: exOriginal.id, situacao: ec.novaSituacao, coletaId: this.coletaSelecionada.id };
-    this.http.put('http://localhost:8080/exameColeta/' + ec.id, req).subscribe({
+    this.http.put('https://hemocentroback.onrender.com/exameColeta/' + ec.id, req).subscribe({
       next: () => {
         alert("Situação do exame atualizada!");
         this.carregarExamesDaColeta(this.coletaSelecionada.id);

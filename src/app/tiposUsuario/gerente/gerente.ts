@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -8,10 +9,28 @@ import { Router } from '@angular/router';
   styleUrl: './gerente.css',
 })
 export class Gerente {
-  constructor(private router: Router) {
+    meuPessoaId!: number;
+
+    constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router) {
     const usuarioString = localStorage.getItem('usuarioLogado');
 
     if (!usuarioString) {
+      this.sair();
+      return;
+    }
+
+    const usuarioLogado = JSON.parse(usuarioString);
+
+    if (usuarioLogado.tipoPerfil !== 'GERENTE') {
+      alert("Acesso negado: Esta página é exclusiva para administradores/gerentes.");
+      this.sair();
+      return;
+    }
+
+    this.meuPessoaId = usuarioLogado.pessoaId;
+
+    if (!this.meuPessoaId) {
+      alert("Erro: Este usuário não possui um ID de gerente vinculado.");
       this.sair();
       return;
     }
