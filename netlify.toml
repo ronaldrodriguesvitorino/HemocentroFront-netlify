@@ -9,7 +9,7 @@
   status = 200
   force = true
   [redirects.headers]
-    X-Forwarded-Host = "hemocentroback.onrender.com"
+    X-Forwarded-Host = "hemocentroback-netlify.onrender.com"
 
 [[redirects]]
   from = "/*"
