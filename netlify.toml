@@ -5,7 +5,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "https://hemocentroback.onrender.com/:splat"
+  to = "https://hemocentroback-netlify.onrender.com/:splat"
   status = 200
   force = true
   [redirects.headers]
