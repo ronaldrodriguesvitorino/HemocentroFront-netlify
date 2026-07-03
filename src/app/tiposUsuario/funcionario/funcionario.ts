@@ -86,6 +86,14 @@ export class Funcionario {
     }
 
     const usuarioLogado = JSON.parse(usuarioString);
+
+    if (usuarioLogado.tipoPerfil !== 'DOADOR') {
+      alert("Acesso negado: Esta página é exclusiva para doadores.");
+      this.sair();
+      return;
+    }
+
+
     this.meuPessoaId = usuarioLogado.pessoaId;
 
     if (!this.meuPessoaId) {
@@ -113,9 +121,9 @@ export class Funcionario {
   }
 
   carregarDadosBase() {
-    this.http.get<any[]>('http://localhost:8080/pessoa').subscribe(res => this.listaDoadores = res);
-    this.http.get<any[]>('http://localhost:8080/hemocentro').subscribe(res => this.listaHemocentros = res);
-    this.http.get<any[]>('http://localhost:8080/exame').subscribe(res => this.listaExamesGerais = res);
+    this.http.get<any[]>('/api/pessoa').subscribe(res => this.listaDoadores = res);
+    this.http.get<any[]>('/api/hemocentro').subscribe(res => this.listaHemocentros = res);
+    this.http.get<any[]>('/api/exame').subscribe(res => this.listaExamesGerais = res);
   }
 
 
@@ -125,14 +133,14 @@ export class Funcionario {
       return;
     }
     const requestPessoa = { nome: this.nome, cpf: this.cpf, email: this.email };
-    this.http.post<any>('http://localhost:8080/pessoa', requestPessoa).subscribe({
+    this.http.post<any>('/api/pessoa', requestPessoa).subscribe({
       next: (pessoaCriada) => {
         const loginFormatado = this.nome.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").split(' ').join('.');
         const requestUsuario = {
           login: loginFormatado, senha: this.cpf, tipoPerfil: 'USUARIO',
           pessoaId: pessoaCriada.id, hemocentroId: Number(this.hemocentroIdDoador)
         };
-        this.http.post('http://localhost:8080/usuario', requestUsuario).subscribe({
+        this.http.post('/api/usuario', requestUsuario).subscribe({
           next: () => {
             alert(`Doador cadastrado!\nLogin: ${loginFormatado}\nSenha: ${this.cpf}`);
             this.nome = ''; this.cpf = ''; this.email = '';
@@ -146,7 +154,7 @@ export class Funcionario {
 
 
   listarColetas() {
-    this.http.get<any[]>('http://localhost:8080/coleta').subscribe(res => {
+    this.http.get<any[]>('/api/coleta').subscribe(res => {
       this.listaColetas = res;
       this.cdr.detectChanges();
     });
@@ -178,7 +186,7 @@ export class Funcionario {
     };
 
     if (this.editandoColeta) {
-      this.http.put('http://localhost:8080/coleta/' + this.idColetaEdicao, request).subscribe({
+      this.http.put('/api/coleta/' + this.idColetaEdicao, request).subscribe({
         next: () => {
           alert("Coleta atualizada com sucesso!");
           this.limparFormularioColeta();
@@ -186,7 +194,7 @@ export class Funcionario {
         }
       });
     } else {
-      this.http.post('http://localhost:8080/coleta', request).subscribe({
+      this.http.post('/api/coleta', request).subscribe({
         next: () => {
           alert("Nova bolsa de sangue registrada!");
           this.limparFormularioColeta();
@@ -208,7 +216,7 @@ export class Funcionario {
 
   excluirColeta(id: number) {
     if (confirm(`Excluir permanentemente a coleta #${id}?`)) {
-      this.http.delete('http://localhost:8080/coleta/' + id).subscribe({
+      this.http.delete('/api/coleta/' + id).subscribe({
         next: () => {
           alert("Coleta excluída!");
           if (this.coletaSelecionada?.id === id) this.coletaSelecionada = null;
@@ -235,7 +243,7 @@ export class Funcionario {
   }
 
   carregarExamesDaColeta(coletaId: number) {
-    this.http.get<any[]>('http://localhost:8080/exameColeta?coletaId=' + coletaId).subscribe({
+    this.http.get<any[]>('/api/exameColeta?coletaId=' + coletaId).subscribe({
       next: (res) => {
         this.examesDestaColeta = res.map(e => ({ ...e, editando: false, novaSituacao: e.situacao }));
         this.atualizarListaDeCheckboxes();
@@ -261,7 +269,7 @@ export class Funcionario {
     let enviados = 0;
     marcados.forEach(ex => {
       const request = { exameId: ex.id, situacao: ex.situacao, coletaId: this.coletaSelecionada.id };
-      this.http.post('http://localhost:8080/exameColeta', request).subscribe({
+      this.http.post('/api/exameColeta', request).subscribe({
         next: () => {
           enviados++;
           if (enviados === marcados.length) {
@@ -280,7 +288,7 @@ export class Funcionario {
     const exameOriginal = this.listaExamesGerais.find(e => e.nome === ec.nome);
     const request = { exameId: exameOriginal.id, situacao: ec.novaSituacao, coletaId: this.coletaSelecionada.id };
 
-    this.http.put('http://localhost:8080/exameColeta/' + ec.id, request).subscribe({
+    this.http.put('/api/exameColeta/' + ec.id, request).subscribe({
       next: () => {
         alert("Situação laboratorial atualizada!");
         this.carregarExamesDaColeta(this.coletaSelecionada.id);

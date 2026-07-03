@@ -44,7 +44,7 @@ export class Usuario {
     );
   }
 
-      constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router) {
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router) {
     const usuarioString = localStorage.getItem('usuarioLogado');
 
     if (!usuarioString) {
@@ -53,6 +53,13 @@ export class Usuario {
     }
 
     const usuarioLogado = JSON.parse(usuarioString);
+
+    if (usuarioLogado.tipoPerfil !== 'GERENTE') {
+      alert("Acesso negado: Esta página é exclusiva para administradores/gerentes.");
+      this.sair();
+      return;
+    }
+
     this.meuPessoaId = usuarioLogado.pessoaId;
 
     if (!this.meuPessoaId) {
@@ -82,10 +89,10 @@ export class Usuario {
   }
 
   listarTudo(): void {
-    this.http.get<any[]>('http://localhost:8080/usuario').subscribe(resUsuarios => {
+    this.http.get<any[]>('/api/usuario').subscribe(resUsuarios => {
       this.listaUsuarios = resUsuarios;
 
-      this.http.get<any[]>('http://localhost:8080/pessoa').subscribe(resPessoas => {
+      this.http.get<any[]>('/api/pessoa').subscribe(resPessoas => {
         this.listaPessoas = resPessoas;
 
         this.listaPessoasDisponiveis = this.listaPessoas.filter(pessoa => {
@@ -100,7 +107,7 @@ export class Usuario {
       });
     });
 
-    this.http.get<any[]>('http://localhost:8080/hemocentro').subscribe(resHemocentros => {
+    this.http.get<any[]>('/api/hemocentro').subscribe(resHemocentros => {
       this.listaHemocentros = resHemocentros;
       this.cdr.detectChanges();
     });
@@ -111,7 +118,7 @@ export class Usuario {
       alert("Digite um ID válido.");
       return;
     }
-    this.http.get('http://localhost:8080/usuario/' + this.idBusca).subscribe({
+    this.http.get('/api/usuario/' + this.idBusca).subscribe({
       next: (resposta) => {
         this.busca = resposta;
         this.cdr.detectChanges();
@@ -154,7 +161,7 @@ export class Usuario {
       hemocentroId: this.hemocentroId
     };
 
-    this.http.post('http://localhost:8080/usuario', request).subscribe({
+    this.http.post('/api/usuario', request).subscribe({
       next: (resposta) => {
         alert("Usuário cadastrado com sucesso!");
         this.limparFormulario();
@@ -188,7 +195,7 @@ export class Usuario {
       hemocentroId: this.hemocentroId
     };
 
-    this.http.put('http://localhost:8080/usuario/' + this.idBusca, request).subscribe({
+    this.http.put('/api/usuario/' + this.idBusca, request).subscribe({
       next: (resposta) => {
         alert("Usuário atualizado com sucesso!");
         this.limparFormulario();
@@ -205,7 +212,7 @@ export class Usuario {
   deletarComConfirmacao(id: number, login: string): void {
     const confirmou = confirm(`Tem certeza que deseja excluir o acesso do usuário "${login}"?`);
     if (confirmou) {
-      this.http.delete('http://localhost:8080/usuario/' + id).subscribe({
+      this.http.delete('/api/usuario/' + id).subscribe({
         next: (resposta) => {
           alert("Usuário excluído com sucesso!");
           this.listarTudo();

@@ -46,6 +46,13 @@ export class Pessoa {
     }
 
     const usuarioLogado = JSON.parse(usuarioString);
+
+    if (usuarioLogado.tipoPerfil !== 'GERENTE') {
+      alert("Acesso negado: Esta página é exclusiva para administradores/gerentes.");
+      this.sair();
+      return;
+    }
+
     this.meuPessoaId = usuarioLogado.pessoaId;
 
     if (!this.meuPessoaId) {
@@ -75,7 +82,7 @@ export class Pessoa {
   }
 
   listar(): void {
-    this.http.get<any[]>('http://localhost:8080/pessoa').subscribe({
+    this.http.get<any[]>('/api/pessoa').subscribe({
       next: (resposta) => {
         this.listaPessoas = resposta;
         this.cdr.detectChanges();
@@ -91,7 +98,7 @@ export class Pessoa {
       alert("Digite um ID válido.");
       return;
     }
-    this.http.get('http://localhost:8080/pessoa/' + this.idBusca).subscribe({
+    this.http.get('/api/pessoa/' + this.idBusca).subscribe({
       next: (resposta) => {
         this.busca = resposta;
         this.cdr.detectChanges();
@@ -130,7 +137,7 @@ export class Pessoa {
       email: this.email
     };
 
-    this.http.post('http://localhost:8080/pessoa', request).subscribe({
+    this.http.post('/api/pessoa', request).subscribe({
       next: (resposta) => {
         alert("Pessoa cadastrada com sucesso!");
         this.limparFormulario();
@@ -158,7 +165,7 @@ export class Pessoa {
       email: this.email
     };
 
-    this.http.put('http://localhost:8080/pessoa/' + this.idBusca, request).subscribe({
+    this.http.put('/api/pessoa/' + this.idBusca, request).subscribe({
       next: (resposta) => {
         alert("Pessoa atualizada com sucesso!");
         this.limparFormulario();
@@ -174,7 +181,7 @@ export class Pessoa {
   deletarComConfirmacao(id: number, nome: string): void {
     const confirmou = confirm(`Tem certeza que deseja excluir a pessoa "${nome}"?`);
     if (confirmou) {
-      this.http.delete('http://localhost:8080/pessoa/' + id).subscribe({
+      this.http.delete('/api/pessoa/' + id).subscribe({
         next: (resposta) => {
           alert("Pessoa excluída com sucesso!");
           this.listar();
