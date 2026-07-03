@@ -3,6 +3,8 @@
   to = "https://hemocentroback.onrender.com/:splat"
   status = 200
   force = true
+  [redirects.headers]
+    X-From-Netlify = "true"
 
 [[redirects]]
   from = "/*"
